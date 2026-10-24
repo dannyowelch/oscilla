@@ -55,7 +55,10 @@ import com.dannyowelch.oscilla.audio.SignalHealth
 import kotlin.math.abs
 
 @Composable
-fun ProbeScreen(viewModel: ProbeViewModel = viewModel()) {
+fun ProbeScreen(
+    onBack: (() -> Unit)? = null,
+    viewModel: ProbeViewModel = viewModel(),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val activity = context as ComponentActivity
@@ -127,6 +130,14 @@ fun ProbeScreen(viewModel: ProbeViewModel = viewModel()) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            if (onBack != null) {
+                TextButton(onClick = {
+                    viewModel.stop()
+                    onBack()
+                }) {
+                    Text("Back to visualizer")
+                }
+            }
             Text("Oscilla", style = MaterialTheme.typography.headlineMedium)
             Text("Audio source probe", style = MaterialTheme.typography.bodyMedium)
             Text(

@@ -166,6 +166,7 @@ class ProbeViewModel(application: Application) : AndroidViewModel(application) {
     fun onProjectionGranted(context: Context, resultCode: Int, data: Intent) {
         inAppSource?.stop()
         inAppSource = null
+        ProbeBus.ownerId = ProbeBus.OWNER_PROBE
         ProbeBus.wantsPlayback = true
         playbackActive = true
         PlaybackCaptureService.start(context, resultCode, data)
@@ -282,6 +283,7 @@ class ProbeViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun onCaptureEvent(event: CaptureEvent) {
+        if (ProbeBus.ownerId != ProbeBus.OWNER_PROBE) return
         when (event) {
             CaptureEvent.Started -> {
                 if (!ProbeBus.wantsPlayback || !_state.value.running) return
