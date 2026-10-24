@@ -16,8 +16,15 @@ sealed interface CaptureEvent {
  * to the probe screen. Playback capture has to run inside that service.
  */
 object ProbeBus {
+    const val OWNER_PROBE: String = "probe"
+    const val OWNER_SHOW: String = "show"
+
     @Volatile
     var wantsPlayback: Boolean = false
+
+    /** Which screen currently owns playback capture, so the other can ignore events. */
+    @Volatile
+    var ownerId: String = ""
 
     private val frames = MutableSharedFlow<AudioFrame>(
         extraBufferCapacity = 1,

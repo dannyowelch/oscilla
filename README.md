@@ -1,8 +1,29 @@
 # Oscilla
 
-A personal Android music visualizer for the Samsung Galaxy Z Fold 8. This slice is the project skeleton, the release pipeline, and an audio-source probe. The probe is there to learn, on the real device, which audio sources actually deliver samples. Fold-specific layouts come later.
+A personal Android music visualizer for the Samsung Galaxy Z Fold 8. The show defaults to `Visualizer` session 0, which is the source that delivered a moving signal from YouTube Music without an extra share step. Playback capture and the microphone are in the settings sheet. The audio probe is still there as a debug view.
 
-The probe offers three sources:
+Untagged builds are `versionName` `0.2.0` and `versionCode` `2000`. After this slice is merged, the next release tag is `v0.2.0` (same versionCode). Do not push that tag until the pull request is merged. `v0.1.0` is the probe release already on GitHub.
+
+## Using the show
+
+The screen is fullscreen. Tap to show or hide the controls. The screen stays on while the visualizer is open. Controls, from left to right:
+
+- **Prev / Next** change the visual. The current visual's parameters stay.
+- **Shuffle** randomizes palette, sensitivity, symmetry, and speed for the current visual, with a short crossfade.
+- **Auto** turns auto mode on or off. Auto reshuffles on the interval chosen in settings, and can also switch to another visual. The change crossfades.
+- **Settings** opens the sheet: audio source (Visualizer, Playback, Microphone), auto interval in seconds or beats, whether auto switches visuals, and **Open audio probe**.
+
+Playback still asks for the system capture consent and runs in a `mediaProjection` foreground service. The chosen source, visual, parameters, and auto settings are remembered. Fold and unfold keeps that state; the layout is one full-screen canvas so the cover screen and the inner screen both just resize. Dedicated fold layouts come later.
+
+The five visuals:
+
+- **Radial** — spectrum bars around a core that grows with the bass. Symmetry repeats the ring.
+- **Lissajous** — the waveform drawn as an oscilloscope figure, x against a delayed copy of itself. Symmetry rotates extra copies.
+- **Burst** — particles leave the center when a bass hit is detected.
+- **Terrain** — recent spectra scroll forward as filled ribbons. Symmetry of 2 or more mirrors them.
+- **Kaleidoscope** — short arcs repeated around the circle, with a slow plasma drift.
+
+The audio probe offers three sources:
 
 - **Playback** — `AudioPlaybackCapture` for `USAGE_MEDIA`, `USAGE_GAME`, and `USAGE_UNKNOWN`, after the system MediaProjection consent dialog. Capture runs in a `mediaProjection` foreground service. Consent is requested before that service starts. If the system revokes the token, capture stops.
 - **Visualizer** — `android.media.audiofx.Visualizer` on session 0 (the output mix).
@@ -20,11 +41,11 @@ You need JDK 21 (17 or newer is enough) and an Android SDK with platform `androi
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Debug builds use `versionName` `dev` and `versionCode` 1. They are signed with the debug key. A later release build is signed with a different key, so Android will not upgrade a debug install in place. Uninstall the debug app first (`adb uninstall com.dannyowelch.oscilla`) before installing a release APK.
+Builds without a `v*` tag use `versionName` `0.2.0` and `versionCode` `2000`. A release built from tag `v0.2.0` uses the same numbers and the upload keystore. A debug APK is signed with the debug key, so Android will not upgrade the `v0.1.0` release in place. Uninstall first (`adb uninstall com.dannyowelch.oscilla`) or install the signed release.
 
 Package id: `com.dannyowelch.oscilla`. `minSdk` is 29. `targetSdk` is 37. The activity sets `resizeableActivity` to true.
 
-On the phone, pick a source and tap Start. Playback asks for the microphone permission (AudioPlaybackCapture requires `RECORD_AUDIO`), notifications, and the system capture dialog, in that order. Then play music in another app. Visualizer and the microphone also ask for `RECORD_AUDIO`. `MODIFY_AUDIO_SETTINGS` is a normal permission declared in the manifest. If you deny the microphone permission permanently, use Open settings.
+Visualizer and the microphone ask for `RECORD_AUDIO` when the show starts. Playback asks for that, then notifications, then the system capture dialog, and you pick the app to share. `MODIFY_AUDIO_SETTINGS` is a normal permission declared in the manifest. If you deny the microphone permission permanently, Settings offers Open app settings. The probe's own Start button still works after you open it from the sheet.
 
 ## versionCode
 
@@ -87,19 +108,19 @@ The release workflow decodes the base64 secret into a temp file and points Gradl
 
 The release workflow does not run on pull requests. It runs when a `v*` tag is pushed, and it fails until the four secrets exist.
 
-After this branch is merged to `main`:
+`v0.1.0` is already released. The next tag, after the visualizer slice is merged, is `v0.2.0`. Do not push it before that merge.
 
 ```bash
 git checkout main
 git pull origin main
-git tag v0.1.0
-git push origin v0.1.0
+git tag v0.2.0
+git push origin v0.2.0
 ```
 
-GitHub Actions builds a signed universal APK (one ABI-universal file, no splits) and attaches `oscilla-0.1.0.apk` to the GitHub Release for that tag. Confirm the Release page has that asset before installing it.
+GitHub Actions builds a signed universal APK and attaches `oscilla-0.2.0.apk` to that release. `versionCode` 2000 is higher than `v0.1.0`'s 1000, so Obtainium can update an install signed with the same keystore.
 
 ```bash
-adb install -r oscilla-0.1.0.apk
+adb install -r oscilla-0.2.0.apk
 ```
 
 ## Obtainium

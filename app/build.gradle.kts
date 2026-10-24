@@ -35,8 +35,8 @@ configure<ApplicationExtension> {
         targetSdk {
             version = release(37)
         }
-        versionCode = releaseVersion?.versionCode ?: 1
-        versionName = releaseVersion?.versionName ?: "dev"
+        versionCode = releaseVersion?.versionCode ?: 2_000
+        versionName = releaseVersion?.versionName ?: "0.2.0"
     }
 
     if (releaseSigningReady) {
